@@ -15,31 +15,29 @@ import sheep.input.TouchListener;
  */
 public class GameController extends sheep.game.State implements TouchListener, CollisionListener{
 
-    private PongPad playerPad;
-    private PongPad CPUPad;
-    private int padHits = 0;
-    private Wall leftWall;
-    private Wall rightWall;
+    private GameModel model;
     private CollisionLayer collisionLayer;
-    private Ball ball;
-    private int CPUScore = 0;
     private Paint p;
-    private Paint paint;
     private Paint scorePaint;
     private ArrayList<Sprite> sprites;
-    private int playerScore = 0;
 
     public GameController(){
 
+        model = new GameModel();
+
+        model.addSprite(new Wall(12, 0));
+
+        model.addSprite(new Wall(Constants.windowwidth-12, 0));
+
         collisionLayer = new CollisionLayer();
 
-        ball = new Ball(Constants.windowwidth/2, Constants.windowheight/2);
+        model.setBall(new Ball(Constants.windowwidth / 2, Constants.windowheight / 2));
 
-        ball.setSpeed(-70, -300);
+        model.getBall().setSpeed(-70, -300);
 
         p = new Paint();
 
-        paint = new Paint();
+        p.setColor(Color.WHITE);
 
         scorePaint = new Paint();
 
@@ -47,28 +45,15 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         scorePaint.setTextSize(150);
 
-        p.setColor(Color.WHITE);
+        model.setPlayer1Pad(new PongPad(Constants.windowwidth/2, 10));
 
-        playerPad = new PongPad(Constants.windowwidth/2, 10);
+        model.setPlayer2Pad(new PongPad(Constants.windowwidth/2, Constants.windowheight-150));
 
-        CPUPad = new PongPad(Constants.windowwidth/2, Constants.windowheight-150);
+        sprites = model.getSprites();
 
-        leftWall = new Wall(12, 0);
-
-        rightWall = new Wall(Constants.windowwidth-12, 0);
-
-
-        sprites = new ArrayList<>();
-
-        sprites.add(playerPad);
-        sprites.add(CPUPad);
-        sprites.add(leftWall);
-        sprites.add(rightWall);
-        sprites.add(ball);
-
-        for(Sprite sprite: sprites){
-            collisionLayer.addSprite(sprite);
-            sprite.addCollisionListener(this);
+        for (int i = 0; i < sprites.size(); i++) {
+            model.getSprites().get(i).addCollisionListener(this);
+            collisionLayer.addSprite(model.getSprites().get(i));
         }
     }
 
@@ -79,13 +64,13 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         cnv.drawRect(0, Constants.windowheight / 2 + 5, Constants.windowwidth, Constants.windowheight / 2 - 5, p);
 
-        for (Sprite sprite: sprites){
-            sprite.draw(cnv);
+        for (int i = 0; i < sprites.size(); i++) {
+            sprites.get(i).draw(cnv);
         }
 
         cnv.save();
         cnv.rotate(90);
-        cnv.drawText(this.playerScore+"      "+this.CPUScore, Constants.windowwidth/2+230, -Constants.windowwidth/2-400,scorePaint);
+        cnv.drawText(model.getPlayer1Score()+"      "+model.getPlayer2Score(), Constants.windowwidth/2+230, -Constants.windowwidth/2-400,scorePaint);
         cnv.restore();
 
     }
@@ -94,26 +79,26 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         collisionLayer.update(dt);
 
-        for (Sprite sprite: sprites){
-            sprite.update(dt);
+        for (int i = 0; i < sprites.size(); i++) {
+            sprites.get(i).update(dt);
         }
 
-        if(ball.getY()-30 <= 0){
-            this.CPUScore++;
-            ball.respawn(true);
-        }else if (ball.getY()+30 >= Constants.windowheight){
-            this.playerScore++;
-            ball.respawn(false);
+        if(model.getBall().getY()-30 <= 0){
+            model.incrementPlayer2();
+            model.getBall().respawn(true);
+        }else if (model.getBall().getY()+30 >= Constants.windowheight){
+            model.incrementPlayer1();
+            model.getBall().respawn(false);
         }
 
-        if(CPUScore == 5 || playerScore == 5){
-            CPUScore = 0;
-            playerScore = 0;
+        if(model.getPlayer1Score() == 5 || model.getPlayer2Score() == 5){
+            model.setPlayer1Score(0);
+            model.setPlayer2Score(0);
         }
 
-        if(padHits == 7){
-            ball.setSpeed(ball.getSpeed().getMultiplied(1.5f));
-            padHits = 0;
+        if(model.getPadHits() == 7){
+            model.getBall().setSpeed(model.getBall().getSpeed().getMultiplied(1.5f));
+            model.setPadHits(0);
         }
     }
 
@@ -123,11 +108,11 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         if(event.getY() < Constants.windowheight/2){
 
-            playerPad.setPosition(event.getX()-200, playerPad.getY());
+            model.getPlayer1Pad().setPosition(event.getX() - 200, model.getPlayer1Pad().getY());
 
         }else{
 
-            CPUPad.setPosition(event.getX()-200, CPUPad.getY());
+            model.getPlayer2Pad().setPosition(event.getX() - 200, model.getPlayer2Pad().getY());
         }
 
         return super.onTouchMove(event);
@@ -138,11 +123,11 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         if(event.getY() < Constants.windowheight/2){
 
-            playerPad.setPosition(event.getX()-200, playerPad.getY());
+            model.getPlayer1Pad().setPosition(event.getX() - 200, model.getPlayer1Pad().getY());
 
         }else{
 
-            CPUPad.setPosition(event.getX()-200, CPUPad.getY());
+            model.getPlayer2Pad().setPosition(event.getX() - 200, model.getPlayer2Pad().getY());
 
         }
 
@@ -163,7 +148,7 @@ public class GameController extends sheep.game.State implements TouchListener, C
         else if (sprite instanceof PongPad){
 
             if(sprite1 instanceof Ball){
-                padHits++;
+                model.incrementPadHits();
                 sprite1.setSpeed(sprite1.getSpeed().getX(), -sprite1.getSpeed().getY());
 
             }
