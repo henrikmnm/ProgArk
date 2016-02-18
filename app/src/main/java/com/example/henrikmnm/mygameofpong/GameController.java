@@ -25,9 +25,13 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         model = new GameModel();
 
+        model.setPlayer1Pad(new PongPad(Constants.windowwidth/2, 10));
+
+        model.setPlayer2Pad(new PongPad(Constants.windowwidth/2, Constants.windowheight-150));
+
         model.addSprite(new Wall(12, 0));
 
-        model.addSprite(new Wall(Constants.windowwidth-12, 0));
+        model.addSprite(new Wall(Constants.windowwidth - 12, 0));
 
         collisionLayer = new CollisionLayer();
 
@@ -45,13 +49,11 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         scorePaint.setTextSize(150);
 
-        model.setPlayer1Pad(new PongPad(Constants.windowwidth/2, 10));
 
-        model.setPlayer2Pad(new PongPad(Constants.windowwidth/2, Constants.windowheight-150));
 
-        sprites = model.getSprites();
 
-        for (int i = 0; i < sprites.size(); i++) {
+
+        for (int i = 0; i < model.getSprites().size(); i++) {
             model.getSprites().get(i).addCollisionListener(this);
             collisionLayer.addSprite(model.getSprites().get(i));
         }
@@ -64,8 +66,8 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         cnv.drawRect(0, Constants.windowheight / 2 + 5, Constants.windowwidth, Constants.windowheight / 2 - 5, p);
 
-        for (int i = 0; i < sprites.size(); i++) {
-            sprites.get(i).draw(cnv);
+        for (int i = 0; i < model.getSprites().size(); i++) {
+            model.getSprites().get(i).draw(cnv);
         }
 
         cnv.save();
@@ -79,8 +81,8 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         collisionLayer.update(dt);
 
-        for (int i = 0; i < sprites.size(); i++) {
-            sprites.get(i).update(dt);
+        for (int i = 0; i < model.getSprites().size(); i++) {
+            model.getSprites().get(i).update(dt);
         }
 
         if(model.getBall().getY()-30 <= 0){
