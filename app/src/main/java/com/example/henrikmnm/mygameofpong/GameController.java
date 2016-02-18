@@ -20,8 +20,9 @@ public class GameController extends sheep.game.State implements TouchListener, C
     private Paint p;
     private Paint scorePaint;
     private ArrayList<Sprite> sprites;
+    private static GameController instance = null;
 
-    public GameController(){
+    private GameController(){
 
         model = new GameModel();
 
@@ -72,7 +73,7 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         cnv.save();
         cnv.rotate(90);
-        cnv.drawText(model.getPlayer1Score()+"      "+model.getPlayer2Score(), Constants.windowwidth/2+230, -Constants.windowwidth/2-400,scorePaint);
+        cnv.drawText(model.getPlayer1Score() + "      " + model.getPlayer2Score(), Constants.windowwidth / 2 + 230, -Constants.windowwidth / 2 - 400, scorePaint);
         cnv.restore();
 
     }
@@ -157,5 +158,12 @@ public class GameController extends sheep.game.State implements TouchListener, C
 
         }
 
+    }
+
+    public static GameController getInstance(){
+        if (instance == null){
+            instance = new GameController();
+        }
+        return instance;
     }
 }

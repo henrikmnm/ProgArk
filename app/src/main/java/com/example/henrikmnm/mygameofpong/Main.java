@@ -22,7 +22,7 @@ public class Main extends Activity{
         Constants.windowwidth = DM.widthPixels;
 
 
-        game.pushState(new GameController());
+        game.pushState(GameController.getInstance());
 
         setContentView(game);
 
